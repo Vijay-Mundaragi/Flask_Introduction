@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, abort
 
 app = Flask(__name__)
 
@@ -25,10 +25,23 @@ def authors():
     return render_template('routing/authors.html')
 
 
-@app.route('/author/<authors_last_name>')
+@app.route('/author/<string:authors_last_name>')
 def author(authors_last_name):
+    if authors_last_name not in AUTHORS_INFO:
+        abort(404)
     return render_template('routing/author.html',
                            author=AUTHORS_INFO[authors_last_name])
+
+@app.route("/author/<string:user>/edit")
+def restrict_access(user):
+    if(user != "admin"):
+        abort(401)
+    else:
+        return "Hello Admin!"
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("routing/404.html"), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
